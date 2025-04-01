@@ -1,24 +1,19 @@
 package routes
 
 import (
-	"backend/handlers"
-	"github.com/gin-contrib/cors"
+	"backend/middleware"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	// 加入 CORS 中间件
+	r.Use(middleware.CORSMiddleware())
 
-	r.POST("/api/login", handlers.LoginHandler)
+	RegisterAuthRoutes(r)
+	RegisterShopRoutes(r)
+	// RegisterBossRoutes(r)
 
 	return r
 }

@@ -1,3 +1,4 @@
+
 -- 创建数据库
 CREATE DATABASE core_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 CREATE DATABASE manufacturer_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -11,11 +12,13 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL COMMENT '1=admin, 2=shop, 3=shop_staff, 4=manufacturer, 5=manufacturer_staff',
+    shop_id INT DEFAULT NULL,
+    factory_id INT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 权限说明（仅供参考，系统中 role_id 直接使用数字）
+-- 权限说明（仅供参考）
 CREATE TABLE permissions (
     role_id INT PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL
@@ -54,8 +57,8 @@ CREATE TABLE manufacturer_staff (
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     manufacturer_id INT,
-    product_code JSON, -- 自定义 JSON 信息
-    intl_barcode VARCHAR(100), -- 国际运输条码
+    product_code JSON,
+    intl_barcode VARCHAR(100),
     name VARCHAR(100),
     category VARCHAR(100),
     spec VARCHAR(100),
@@ -65,19 +68,19 @@ CREATE TABLE products (
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
 );
 
--- 包装信息（一个包装对应多个产品）
+-- 包装信息
 CREATE TABLE packages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     manufacturer_id INT,
     status ENUM('packing', 'shipped', 'in_transit', 'delivered') DEFAULT 'packing',
-    barcode VARCHAR(100) NOT NULL UNIQUE, -- 包装二维码
+    barcode VARCHAR(100) NOT NULL UNIQUE,
     item_count INT DEFAULT 0,
     remarks TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
 );
 
--- 包装内的商品明细
+-- 包装商品明细
 CREATE TABLE package_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     package_id INT,
@@ -107,7 +110,7 @@ CREATE TABLE shop_staff (
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
--- 入库记录（扫码入库）
+-- 入库记录
 CREATE TABLE inbound_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -119,7 +122,7 @@ CREATE TABLE inbound_records (
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
--- 出库记录（扫码出库）
+-- 出库记录
 CREATE TABLE outbound_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -141,6 +144,19 @@ CREATE TABLE inventory (
     outbound_total INT DEFAULT 0,
     alert_low INT DEFAULT 0,
     alert_high INT DEFAULT 99999,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (shop_id) REFERENCES shops(id)
+);
+
+-- 库存状态
+CREATE TABLE shop_daily_stats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shop_id INT NOT NULL,
+    date DATE NOT NULL,
+    total_in  INT DEFAULT 0 COMMENT '当日入库数量',
+    total_out  INT DEFAULT 0 COMMENT '当日出库数量',
+    stock  INT DEFAULT 0 COMMENT '当日剩余库存',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );

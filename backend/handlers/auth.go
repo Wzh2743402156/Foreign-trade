@@ -18,9 +18,10 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	authDB := db.DBs["core_db"]
 	var user models.User
 	// 查找用户名是否存在
-	if err := db.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+	if err := authDB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"error":   "账号不存在",
@@ -54,6 +55,8 @@ func LoginHandler(c *gin.Context) {
 		"data": gin.H{
 			"user_id": user.ID,
 			"token":   token,
+			"role_id": user.RoleID,
+			"shop_id": user.ShopID,
 		},
 	})
 }
