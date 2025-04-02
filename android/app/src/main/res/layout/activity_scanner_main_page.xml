@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_margin="0dp"
+    android:padding="0dp">
+
+    <!-- 顶部切换栏：入库 / 出库 -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:background="#2E7D32"
+        android:paddingHorizontal="16dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_marginLeft="10dp"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"/>
+
+        <!-- 出入库切换按钮 -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/mode_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            app:singleSelection="true"
+            app:checkedButton="@id/btn_out"
+            app:selectionRequired="true">
+
+            <!-- 入库按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_in"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="入库"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                app:strokeColor="@android:color/white"
+                app:strokeWidth="3dp"
+                app:cornerRadius="16dp"
+                app:backgroundTint="#2E7D32" />
+
+            <!-- 出库按钮（默认选中） -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_out"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="✅ 出库"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3dp"
+                app:cornerRadius="16dp"
+                app:backgroundTint="#FFEB3B" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- 设置按钮 -->
+        <LinearLayout
+            android:layout_marginRight="10dp"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:gravity="right|center_vertical">
+
+            <ImageView
+                android:id="@+id/settings"
+                android:src="@drawable/ic_settings"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 中间摄像头 + 扫描框 -->
+    <FrameLayout
+        android:id="@+id/scan_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 摄像头画面 -->
+        <androidx.camera.view.PreviewView
+            android:id="@+id/cameraPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- 扫描区域：中间半透明的一个框 -->
+        <FrameLayout
+            android:id="@+id/scan_box"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            android:background="@drawable/overlay_mask">
+
+            <!-- 扫描绿线 -->
+            <ImageView
+                android:id="@+id/scan_line"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_gravity="top"
+                android:background="@drawable/scan_line_gradient"
+                android:visibility="invisible"/>
+
+        </FrameLayout>
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DCDCDC"/>
+
+    <!-- 底部按钮栏 -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="#000000"
+        android:paddingBottom="8dp">
+
+        <!-- 条形码按钮 -->
+        <LinearLayout
+            android:id="@+id/layout_barcode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginHorizontal="32dp">
+
+            <ImageView
+                android:id="@+id/barcode_dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/dot_selector"/>
+
+            <TextView
+                android:id="@+id/barcode_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="条形码"
+                android:textStyle="bold"
+                android:textColor="#FFFF00"
+                android:textSize="18sp"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- 二维码按钮 -->
+        <LinearLayout
+            android:id="@+id/layout_qrcode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginHorizontal="32dp">
+
+            <ImageView
+                android:id="@+id/qrcode_dot"
+                android:visibility="invisible"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/dot_selector"/>
+
+            <TextView
+                android:id="@+id/qrcode_text"
+                android:text="二维码"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:background="@color/black"/>
+
+</LinearLayout>
