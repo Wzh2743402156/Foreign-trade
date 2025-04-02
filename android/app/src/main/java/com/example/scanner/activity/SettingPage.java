@@ -1,4 +1,4 @@
-package com.example.scanner;
+package com.example.scanner.activity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -11,9 +11,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.scanner.R;
+
 public class SettingPage extends AppCompatActivity {
 
     private LinearLayout backBtn;
+    private boolean closeFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +42,18 @@ public class SettingPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 System.out.println("click back button");
-                finish();
+                if(!closeFlag){
+                    closeFlag = true;
+                    finish();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+
             }
         });
     }
 
     private void componentInit() {
+        closeFlag = false;
         backBtn = (LinearLayout) findViewById(R.id.back_button);
     }
 }

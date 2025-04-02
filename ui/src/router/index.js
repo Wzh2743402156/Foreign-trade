@@ -4,6 +4,7 @@ import BossDashboard from '../views/boss/Dashboard.vue'
 import ShopDashboard from '../views/shop/Dashboard.vue'
 import Inventory from '../views/shop/Inventory.vue'
 import Notifications from '../views/shop/Notifications.vue'
+import DetailCheck from '../views/shop/DetailCheck.vue'
 
 const routes = [
   // 默认跳到 /login
@@ -27,6 +28,10 @@ const routes = [
       {
         path: 'inventory',
         component: Inventory
+      },
+      {
+        path: 'detailcheck',
+        component: DetailCheck
       },
       {
         path: 'notifications',

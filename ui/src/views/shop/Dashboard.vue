@@ -5,6 +5,9 @@
           <li :class="{ active: isActive('/shop/inventory') }">
             <router-link to="/shop/inventory">库存信息</router-link>
           </li>
+          <li :class="{ active: isActive('/shop/detailcheck') }">
+            <router-link to="/shop/detailcheck">商品查询</router-link>
+          </li>
           <li :class="{ active: isActive('/shop/notifications') }">
             <router-link to="/shop/notifications">消息通知</router-link>
           </li>
