@@ -1,40 +1,30 @@
-
 -- 创建数据库
 CREATE DATABASE core_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-CREATE DATABASE manufacturer_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE factory_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 CREATE DATABASE shop_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
+-- =====================
+-- core_db
+-- =====================
 USE core_db;
 
--- 用户表
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL COMMENT '1=admin, 2=shop, 3=shop_staff, 4=manufacturer, 5=manufacturer_staff',
+    permission VARCHAR(50) DEFAULT NULL COMMENT '可选的细粒度权限标识，如"super_admin"、"viewer"等',
     shop_id INT DEFAULT NULL,
     factory_id INT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 权限说明（仅供参考）
-CREATE TABLE permissions (
-    role_id INT PRIMARY KEY,
-    role_name VARCHAR(50) NOT NULL
-);
+-- =====================
+-- factory_db
+-- =====================
+USE factory_db;
 
--- 初始化权限（可选）
-INSERT INTO permissions (role_id, role_name) VALUES
-(1, 'admin'),
-(2, 'shop'),
-(3, 'shop_staff'),
-(4, 'manufacturer'),
-(5, 'manufacturer_staff');
-
-USE manufacturer_db;
-
--- 厂家信息
 CREATE TABLE manufacturers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
@@ -43,7 +33,6 @@ CREATE TABLE manufacturers (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- 厂家员工
 CREATE TABLE manufacturer_staff (
     id INT AUTO_INCREMENT PRIMARY KEY,
     manufacturer_id INT,
@@ -53,22 +42,18 @@ CREATE TABLE manufacturer_staff (
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
 );
 
--- 产品信息
 CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT PRIMARY KEY,
     manufacturer_id INT,
-    product_code JSON,
+    product_code VARCHAR(100),
     intl_barcode VARCHAR(100),
     name VARCHAR(100),
     category VARCHAR(100),
     spec VARCHAR(100),
     location VARCHAR(100),
-    remarks TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
+    remarks TEXT
 );
 
--- 包装信息
 CREATE TABLE packages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     manufacturer_id INT,
@@ -80,7 +65,6 @@ CREATE TABLE packages (
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
 );
 
--- 包装商品明细
 CREATE TABLE package_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     package_id INT,
@@ -89,9 +73,12 @@ CREATE TABLE package_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+-- =====================
+-- shop_db
+-- =====================
 USE shop_db;
 
--- 店铺信息
+-- 商店基础信息
 CREATE TABLE shops (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
@@ -100,7 +87,6 @@ CREATE TABLE shops (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- 店员信息
 CREATE TABLE shop_staff (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -108,6 +94,20 @@ CREATE TABLE shop_staff (
     position VARCHAR(100),
     remarks TEXT,
     FOREIGN KEY (shop_id) REFERENCES shops(id)
+);
+
+-- 本地简化版 products 表（为了解决外键问题）
+CREATE TABLE products (
+    id INT PRIMARY KEY,
+    shop_id INT NOT NULL,
+    manufacturer_id INT,
+    product_code VARCHAR(100),
+    intl_barcode VARCHAR(100),
+    name VARCHAR(100),
+    category VARCHAR(100),
+    spec VARCHAR(100),
+    location VARCHAR(100),
+    remarks TEXT
 );
 
 -- 入库记录
@@ -119,7 +119,8 @@ CREATE TABLE inbound_records (
     quantity INT,
     operator VARCHAR(100),
     remarks TEXT,
-    FOREIGN KEY (shop_id) REFERENCES shops(id)
+    FOREIGN KEY (shop_id) REFERENCES shops(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 -- 出库记录
@@ -131,10 +132,11 @@ CREATE TABLE outbound_records (
     quantity INT,
     operator VARCHAR(100),
     remarks TEXT,
-    FOREIGN KEY (shop_id) REFERENCES shops(id)
+    FOREIGN KEY (shop_id) REFERENCES shops(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 库存信息
+-- 当前库存表
 CREATE TABLE inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -145,10 +147,11 @@ CREATE TABLE inventory (
     alert_low INT DEFAULT 0,
     alert_high INT DEFAULT 99999,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (shop_id) REFERENCES shops(id)
+    FOREIGN KEY (shop_id) REFERENCES shops(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 库存状态
+-- 每日商店级别统计
 CREATE TABLE shop_daily_stats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT NOT NULL,
@@ -161,3 +164,50 @@ CREATE TABLE shop_daily_stats (
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
+-- 每日每个商品汇总
+CREATE TABLE product_summary (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shop_id INT NOT NULL,
+    product_id INT NOT NULL,
+    summary_date DATE NOT NULL,
+
+    product_code VARCHAR(100),
+    category VARCHAR(100),
+    product_name VARCHAR(100),
+    spec VARCHAR(100),
+    location VARCHAR(100),
+
+    total_in INT DEFAULT 0,
+    total_out INT DEFAULT 0,
+    current_stock INT DEFAULT 0,
+
+    remarks TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uniq_summary (shop_id, product_id, summary_date),
+    FOREIGN KEY (shop_id) REFERENCES shops(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- 操作明细日志
+CREATE TABLE product_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shop_id INT NOT NULL,
+    product_id INT NOT NULL,
+    operation_type ENUM('inbound', 'outbound') NOT NULL,
+    quantity INT NOT NULL,
+    operator VARCHAR(100),
+    log_date DATE NOT NULL,
+
+    product_code VARCHAR(100),
+    category VARCHAR(100),
+    product_name VARCHAR(100),
+    spec VARCHAR(100),
+    location VARCHAR(100),
+    remarks TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (shop_id) REFERENCES shops(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);

@@ -8,12 +8,21 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	// 加入 CORS 中间件
+	// CORS 支持
 	r.Use(middleware.CORSMiddleware())
 
+	// 登录相关（无需鉴权）
 	RegisterAuthRoutes(r)
+
+	// 用户信息相关（需要鉴权）
+	RegisterUserRoutes(r)
+
+	// 店铺模块
 	RegisterShopRoutes(r)
+
+	// TODO: 注册 Boss 和 Factory 路由
 	// RegisterBossRoutes(r)
+	// RegisterFactoryRoutes(r)
 
 	return r
 }

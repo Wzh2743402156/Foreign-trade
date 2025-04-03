@@ -26,13 +26,13 @@ func InitMultiDB() {
 	}
 	DBs["shop_db"] = shopDB
 
-	// manufacturer_db
-	factoryDSN := "root:123456@tcp(8.130.70.249:3306)/manufacturer_db?charset=utf8mb4&parseTime=True&loc=Local"
+	// factory_db
+	factoryDSN := "root:123456@tcp(8.130.70.249:3306)/factory_db?charset=utf8mb4&parseTime=True&loc=Local"
 	factoryDB, err := gorm.Open(mysql.Open(factoryDSN), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("连接 manufacturer_db 失败: %v", err)
+		log.Fatalf("连接 factory_db 失败: %v", err)
 	}
-	DBs["manufacturer_db"] = factoryDB
+	DBs["factory_db"] = factoryDB
 
 	log.Println("所有数据库连接成功")
 }
@@ -42,7 +42,7 @@ func GetDBByRole(roleID int) *gorm.DB {
 	case 2, 3:
 		return DBs["shop_db"]
 	case 4, 5:
-		return DBs["manufacturer_db"]
+		return DBs["factory_db"]
 	default:
 		return DBs["core_db"]
 	}

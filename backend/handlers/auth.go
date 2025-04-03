@@ -39,7 +39,15 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 创建 Token
-	token, err := utils.GenerateToken(user.ID)
+	token, err := utils.GenerateToken(utils.Claims{
+		UserID:     user.ID,
+		Username:   user.Username,
+		RoleID:     user.RoleID,
+		Permission: user.Permission,
+		ShopID:     user.ShopID,
+		FactoryID:  user.FactoryID,
+	})
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

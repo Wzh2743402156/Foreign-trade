@@ -15,31 +15,9 @@
       <button @click="updateAlertLine">更新</button>
     </div>
 
-    <!-- 出入库折线图 -->
+    <!-- 折线图 -->
     <v-chart v-if="chartReady" class="chart" :option="chartOptions" autoresize />
     <v-chart v-if="chartReady" class="chart" :option="stockOptions" autoresize />
-
-    <!-- 库存表格 -->
-    <table>
-      <thead>
-        <tr>
-          <th>商品 ID</th>
-          <th>当前库存</th>
-          <th>累计入库</th>
-          <th>累计出库</th>
-          <th>更新时间</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in inventory" :key="item.id">
-          <td>{{ item.product_id }}</td>
-          <td>{{ item.current_quantity }}</td>
-          <td>{{ item.inbound_total }}</td>
-          <td>{{ item.outbound_total }}</td>
-          <td>{{ item.updated_at }}</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
@@ -71,17 +49,14 @@ use([
   DataZoomComponent
 ])
 
-const inventory = ref([])
 const chartOptions = ref({})
 const stockOptions = ref({})
 const totalIn = ref(0)
 const totalOut = ref(0)
 const chartReady = ref(false)
-
-const alertLine = ref(200) // 默认警戒线
+const alertLine = ref(200)
 
 function updateAlertLine() {
-  // 更新库存图中的警戒线
   if (stockOptions.value.series?.length >= 2) {
     stockOptions.value.series[1].data = Array(stockOptions.value.xAxis.data.length).fill(alertLine.value)
   }
@@ -89,9 +64,6 @@ function updateAlertLine() {
 
 onMounted(async () => {
   const shopId = localStorage.getItem('shop_id')
-
-  const invRes = await axios.get(`http://localhost:8080/api/shop/inventory?shop_id=${shopId}`)
-  inventory.value = invRes.data.data
 
   const statRes = await axios.get(`http://localhost:8080/api/shop/stats?shop_id=${shopId}`)
   const stats = statRes.data.data
@@ -140,7 +112,7 @@ onMounted(async () => {
         type: 'line',
         data: stockData,
         smooth: true,
-        itemStyle: { color: '#f1c40f' } // 黄色
+        itemStyle: { color: '#f1c40f' }
       },
       {
         name: '警戒线',
@@ -185,10 +157,12 @@ onMounted(async () => {
   align-items: center;
   gap: 10px;
 }
+
 .alert-setting input {
   width: 100px;
   padding: 5px;
 }
+
 .alert-setting button {
   padding: 6px 12px;
   background-color: #67c23a;
@@ -202,17 +176,5 @@ onMounted(async () => {
   width: 100%;
   height: 300px;
   margin-bottom: 30px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
 }
 </style>
