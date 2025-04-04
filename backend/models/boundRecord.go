@@ -3,14 +3,22 @@ package models
 import "time"
 
 type BoundRecord struct {
-	ID            uint      `gorm:"primaryKey"`
-	ShopID        uint      `json:"shop_id"`
-	ProductID     uint      `json:"product_id"`
-	Quantity      int       `json:"quantity"`
-	Operator      string    `json:"operator"`
-	Date          time.Time `json:"date"`
-	OperationType string    `json:"operation_type"`
-	Remarks       string    `json:"remarks"`
+	ID            int       `gorm:"primaryKey" json:"id"`
+	ShopID        int       `gorm:"column:shop_id" json:"shop_id"`
+	ProductID     int       `gorm:"column:product_id" json:"product_id"`
+	OperationType string    `gorm:"column:operation_type" json:"operation_type"`
+	Quantity      int       `gorm:"column:quantity" json:"quantity"`
+	Operator      string    `gorm:"column:operator" json:"operator"`
+	LogDate       time.Time `gorm:"column:log_date" json:"log_date"`
+
+	ProductCode string `gorm:"column:product_code" json:"product_code"`
+	Category    string `gorm:"column:category" json:"category"`
+	Name        string `gorm:"column:product_name"`
+	Spec        string `gorm:"column:spec" json:"spec"`
+	Location    string `gorm:"column:location" json:"location"`
+	Remarks     string `gorm:"column:remarks" json:"remarks"`
+
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
 }
 
 func (BoundRecord) TableName() string {

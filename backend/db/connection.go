@@ -13,7 +13,7 @@ var DBs = make(map[string]*gorm.DB)
 
 func InitMultiDB() {
 	// 加载 .env 文件
-	if err := godotenv.Load("../.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("未找到 .env 文件，使用系统环境变量")
 	}
 
