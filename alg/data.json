@@ -1,8 +1,12 @@
 {
-    "product_id": "123456",
-    "name": "智能标签",
-    "location": "仓库A区",
-    "quantity": 50,
-    "last_updated": "2025-03-31"
-  }
-  
+  "barcode": "PKG20250403001",      
+  "product_code": "ABC-001",  
+  "name": "智能标签",                  
+  "category": "电子标签",              
+  "spec": "5cm*5cm",
+  "factory_id": 1,                
+  "factory_name": "华南工厂",  
+  "factory_date": "2025-04-03",
+  "product_id": 123456,
+  "intl_barcode": "6921234567890"
+}

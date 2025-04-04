@@ -1,0 +1,11 @@
+USE core_db;
+DELETE FROM users;
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (1, 'admin1', '123456', 1, NULL, NULL);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (2, 'shop_owner1', '123456', 2, 1, NULL);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (3, 'shop_staff1', '123456', 3, 1, NULL);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (4, 'shop_owner2', '123456', 2, 2, NULL);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (5, 'shop_staff2', '123456', 3, 2, NULL);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (6, 'factory_owner1', '123456', 4, NULL, 1);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (7, 'factory_staff1', '123456', 5, NULL, 1);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (8, 'factory_owner2', '123456', 4, NULL, 2);
+INSERT INTO users (id, username, password, role_id, shop_id, factory_id) VALUES (9, 'factory_staff2', '123456', 5, NULL, 2);

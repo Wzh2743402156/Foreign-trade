@@ -21,8 +21,8 @@ import os
 
 # 4. 生成 EAN-13 条形码
 ean = barcode.get_barcode_class('ean13')
-ean_code = ean('123456789012', writer=ImageWriter())  # EAN-13 编号，这里用示例的12位数字
-barcode_path = "ean13.png"
+ean_code = ean('6921234567890', writer=ImageWriter())  # EAN-13 编号，这里用示例的12位数字
+barcode_path = "ean13"
 ean_code.save(barcode_path)
 print("EAN-13 条形码已保存为 ean13.png")
 
@@ -34,7 +34,7 @@ else:
 
 # 5. 将二维码和条形码合并到同一图像中
 qr_img = Image.open(qr_path)
-barcode_img = Image.open(barcode_path)
+barcode_img = Image.open(barcode_path + ".png")
 
 
 # 调整条形码图像大小，以便它们适应同一个图像

@@ -3,6 +3,7 @@ package com.example.scanner.activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -36,7 +37,7 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
 
     private String currentMode = "barcode";  // "barcode" 或 "qrcode"
     private TextView barcodeText, qrcodeText;
-    private ImageView barcodeDot, qrcodeDot, settingsBtn;
+    private ImageView barcodeDot, qrcodeDot, settingsBtn, barcode_img, qrcode_img;
     private LinearLayout layoutBarcode, layoutQrcode;
     private PreviewView previewView;
 
@@ -105,10 +106,12 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
         layoutBarcode = findViewById(R.id.layout_barcode);
         barcodeDot = findViewById(R.id.barcode_dot);
         barcodeText = findViewById(R.id.barcode_text);
+        barcode_img = findViewById(R.id.barcode_img);
 
         layoutQrcode = findViewById(R.id.layout_qrcode);
         qrcodeDot = findViewById(R.id.qrcode_dot);
         qrcodeText = findViewById(R.id.qrcode_text);
+        qrcode_img = findViewById(R.id.qrcode_img);
 
         settingsBtn = findViewById(R.id.settings);
 
@@ -172,15 +175,19 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
         if ("barcode".equals(currentMode)) {
             barcodeText.setTextColor(Color.YELLOW);
             barcodeDot.setVisibility(View.VISIBLE);
+            barcode_img.setColorFilter(Color.parseColor("#FFEB3B"), PorterDuff.Mode.SRC_IN);
 
             qrcodeText.setTextColor(Color.WHITE);
             qrcodeDot.setVisibility(View.INVISIBLE);
+            qrcode_img.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN);
         } else {
             qrcodeText.setTextColor(Color.YELLOW);
             qrcodeDot.setVisibility(View.VISIBLE);
+            qrcode_img.setColorFilter(Color.parseColor("#FFEB3B"), PorterDuff.Mode.SRC_IN);
 
             barcodeText.setTextColor(Color.WHITE);
             barcodeDot.setVisibility(View.INVISIBLE);
+            barcode_img.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN);
         }
     }
 
@@ -279,7 +286,7 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
             // 显示loading
             LottieDialog.showLoading(this, "正在出库中...");
 
-            new ScanProcessor().handleOutbound(raw, success -> {
+            new ScanProcessor().handleOutbound(this, raw, success -> {
                 Log.d("ScannerMainPage zhihanwang", "🚀 已触发 ScanProcessor.handleOutbound(), success=" + success);
 
                 // 回到UI线程
@@ -294,6 +301,7 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
                     enableScanner();
                 });
             });
+
         } else {
             // TODO: 入库逻辑
         }

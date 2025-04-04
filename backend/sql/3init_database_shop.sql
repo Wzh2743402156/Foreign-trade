@@ -1,84 +1,10 @@
--- 创建数据库
-CREATE DATABASE core_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-CREATE DATABASE factory_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 CREATE DATABASE shop_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
--- =====================
--- core_db
--- =====================
-USE core_db;
-
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role_id INT NOT NULL COMMENT '1=admin, 2=shop, 3=shop_staff, 4=manufacturer, 5=manufacturer_staff',
-    permission VARCHAR(50) DEFAULT NULL COMMENT '可选的细粒度权限标识，如"super_admin"、"viewer"等',
-    shop_id INT DEFAULT NULL,
-    factory_id INT DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- =====================
--- factory_db
--- =====================
-USE factory_db;
-
-CREATE TABLE manufacturers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
-    location VARCHAR(255),
-    remarks TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE manufacturer_staff (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    manufacturer_id INT,
-    name VARCHAR(100),
-    position VARCHAR(100),
-    remarks TEXT,
-    FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
-);
-
-CREATE TABLE products (
-    id INT PRIMARY KEY,
-    manufacturer_id INT,
-    product_code VARCHAR(100),
-    intl_barcode VARCHAR(100),
-    name VARCHAR(100),
-    category VARCHAR(100),
-    spec VARCHAR(100),
-    location VARCHAR(100),
-    remarks TEXT
-);
-
-CREATE TABLE packages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    manufacturer_id INT,
-    status ENUM('packing', 'shipped', 'in_transit', 'delivered') DEFAULT 'packing',
-    barcode VARCHAR(100) NOT NULL UNIQUE,
-    item_count INT DEFAULT 0,
-    remarks TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)
-);
-
-CREATE TABLE package_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    package_id INT,
-    product_id INT,
-    FOREIGN KEY (package_id) REFERENCES packages(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
-);
 
 -- =====================
 -- shop_db
 -- =====================
 USE shop_db;
 
--- 商店基础信息
 CREATE TABLE shops (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
@@ -96,21 +22,22 @@ CREATE TABLE shop_staff (
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
--- 本地简化版 products 表（为了解决外键问题）
 CREATE TABLE products (
     id INT PRIMARY KEY,
     shop_id INT NOT NULL,
-    manufacturer_id INT,
+    factory_id INT,
     product_code VARCHAR(100),
     intl_barcode VARCHAR(100),
     name VARCHAR(100),
     category VARCHAR(100),
     spec VARCHAR(100),
     location VARCHAR(100),
-    remarks TEXT
+    remarks TEXT,
+    package_id INT DEFAULT NULL COMMENT '所属包裹 ID',
+    package_status ENUM('bound', 'unbound') DEFAULT 'bound' COMMENT '包裹绑定状态',
+    FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
--- 入库记录
 CREATE TABLE inbound_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -123,7 +50,6 @@ CREATE TABLE inbound_records (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 出库记录
 CREATE TABLE outbound_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -136,7 +62,6 @@ CREATE TABLE outbound_records (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 当前库存表
 CREATE TABLE inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT,
@@ -151,7 +76,6 @@ CREATE TABLE inventory (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 每日商店级别统计
 CREATE TABLE shop_daily_stats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT NOT NULL,
@@ -164,7 +88,6 @@ CREATE TABLE shop_daily_stats (
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
--- 每日每个商品汇总
 CREATE TABLE product_summary (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT NOT NULL,
@@ -190,7 +113,6 @@ CREATE TABLE product_summary (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 操作明细日志
 CREATE TABLE product_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shop_id INT NOT NULL,

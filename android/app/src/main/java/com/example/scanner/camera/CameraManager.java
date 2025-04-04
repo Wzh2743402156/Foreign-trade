@@ -139,9 +139,9 @@ public class CameraManager {
                             new BarcodeProcessor(callback).handleBarcode(barcode);
                         }
 
-                        // 延迟 1.5s 再次允许
+                        // 延迟 0.8s 再次允许
                         new Handler(Looper.getMainLooper())
-                                .postDelayed(() -> isScanning = false, 1500);
+                                .postDelayed(() -> isScanning = false, 800);
                     }
                 })
                 .addOnFailureListener(e ->

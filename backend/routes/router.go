@@ -20,6 +20,9 @@ func SetupRouter() *gin.Engine {
 	// 店铺模块
 	RegisterShopRoutes(r)
 
+	// 扫码出入库模块
+	RegisterBoundRoutes(r)
+
 	// TODO: 注册 Boss 和 Factory 路由
 	// RegisterBossRoutes(r)
 	// RegisterFactoryRoutes(r)
