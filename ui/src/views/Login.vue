@@ -47,7 +47,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { apiMethods } from '@/utils/api';
 
 const router = useRouter()
 const form = ref({ username: '', password: '' })
@@ -58,7 +58,7 @@ const handleLogin = async () => {
   error.value = ''
   loading.value = true
   try {
-    const res = await axios.post('http://localhost:8080/api/login', form.value)
+    const res = await apiMethods.post('/login', form.value);
 
     if (res.data.success) {
       const { token, role_id, shop_id, factory_id } = res.data.data

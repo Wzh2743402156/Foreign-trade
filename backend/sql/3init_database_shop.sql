@@ -35,6 +35,7 @@ CREATE TABLE products (
     remarks TEXT,
     package_id INT DEFAULT NULL COMMENT '所属包裹 ID',
     package_status ENUM('bound', 'unbound') DEFAULT 'bound' COMMENT '包裹绑定状态',
+    status ENUM('in_stock', 'outbound') DEFAULT 'in_stock' COMMENT '商品状态：在库 / 已出库',
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 

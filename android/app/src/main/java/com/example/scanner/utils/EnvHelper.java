@@ -22,7 +22,7 @@ public class EnvHelper {
                 }
             }
         } catch (Exception e) {
-            Log.e("EnvHelper zhihanwang", "读取 env 失败: " + e.getMessage());
+            Log.e("EnvHelper zhihanwang", "读取 env.properties 失败: " + e.getMessage());
         }
         return null;
     }

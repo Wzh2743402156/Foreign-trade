@@ -40,8 +40,14 @@ for i in range(1, 201):
         f"VALUES ({i}, {factory_id}, '{code}', '{barcode}', '{name}', '{category}', '{spec}', '{location}', '{remarks}', NULL, 'unbound');"
     )
 
-# ========== shop_db products ==========
-shop_sql = ["USE shop_db;", "DELETE FROM products;", "DELETE FROM shops;"]
+# ========== shop_db products + inventory ==========
+shop_sql = [
+    "USE shop_db;",
+    "DELETE FROM products;",
+    "DELETE FROM shops;",
+    "DELETE FROM inventory;"  # 删除旧库存记录
+]
+
 shop_sql.append("INSERT INTO shops (id, name, location, remarks) VALUES "
                 "(1, '深圳旗舰店', '深圳', '自动生成'),"
                 "(2, '北京直营店', '北京', '自动生成');")
@@ -56,12 +62,22 @@ for i in range(1, 201):
     spec = "7cm*7cm"
     location = f"货架{i % 10}"
     remarks = "同步工厂"
+
+    # 插入产品信息
     shop_sql.append(
-        f"INSERT INTO products (id, shop_id, factory_id, product_code, intl_barcode, name, category, spec, location, remarks, package_id, package_status) "
-        f"VALUES ({i}, {shop_id}, {factory_id}, '{code}', '{barcode}', '{name}', '{category}', '{spec}', '{location}', '{remarks}', NULL, 'bound');"
+        f"INSERT INTO products (id, shop_id, factory_id, product_code, intl_barcode, name, category, spec, location, remarks, package_id, package_status, status) "
+        f"VALUES ({i}, {shop_id}, {factory_id}, '{code}', '{barcode}', '{name}', '{category}', '{spec}', '{location}', '{remarks}', NULL, 'bound', 'in_stock');"
     )
 
+    # 插入库存记录，初始库存10，已出库0
+    shop_sql.append(
+        f"INSERT INTO inventory (shop_id, product_id, current_quantity, outbound_total) "
+        f"VALUES ({shop_id}, {i}, 10, 0);"
+    )
+
+# 保存 SQL 脚本
 import os
+
 core_path = "./4insert_core_data.sql"
 factory_path = "./5insert_factory_data.sql"
 shop_path = "./6insert_shop_data.sql"
