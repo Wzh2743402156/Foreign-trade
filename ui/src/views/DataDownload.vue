@@ -3,9 +3,6 @@
     <!-- 过滤器和控制面板 -->
     <div class="bg-white rounded-lg shadow-md">
       <div class="p-5">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">数据导出</h3>
-        <p class="text-gray-600 mb-6">选择时间范围和数据粒度，导出库存数据报表</p>
-        
         <!-- 快捷选择按钮 -->
         <div class="mb-6">
           <h4 class="text-sm font-medium text-gray-700 mb-2">快捷选择</h4>
