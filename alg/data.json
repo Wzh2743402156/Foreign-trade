@@ -1,12 +1,9 @@
-{
-  "barcode": "PKG20250403001",      
+{   
   "product_code": "ABC-001",  
-  "name": "智能标签",                  
-  "category": "电子标签",              
-  "spec": "5cm*5cm",
-  "factory_id": 1,                
-  "factory_name": "华南工厂",  
-  "factory_date": "2025-04-03",
-  "product_id": 123456,
+  "name": "产品1",                  
+  "category": "机械",              
+  "spec": "7cm*7cm",
+  "shop_id": 1,                
+  "product_id": 1,
   "intl_barcode": "6921234567890"
 }

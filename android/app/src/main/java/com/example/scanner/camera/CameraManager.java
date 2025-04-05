@@ -107,12 +107,14 @@ public class CameraManager {
     private void analyzeImage(ImageProxy imageProxy) {
         if (imageProxy.getImage() == null) {
             imageProxy.close();
+            Log.d("CameraManager zhihanwang", "图像为空，跳过处理");
             return;
         }
 
         // 如果外部说不能扫，或者内部已锁定，则跳过
         if (!callback.canScan() || isScanning) {
             imageProxy.close();
+//            Log.d("CameraManager zhihanwang", "无法扫描，跳过此帧");
             return;
         }
 
@@ -134,21 +136,31 @@ public class CameraManager {
 
                         // 分别调用
                         if ("qrcode".equals(mode)) {
+                            Log.d("CameraManager zhihanwang", "调用二维码处理");
                             new QrcodeProcessor(callback).handleQrcode(barcode);
                         } else {
+                            Log.d("CameraManager zhihanwang", "调用条形码处理");
                             new BarcodeProcessor(callback).handleBarcode(barcode);
                         }
 
                         // 延迟 0.8s 再次允许
                         new Handler(Looper.getMainLooper())
-                                .postDelayed(() -> isScanning = false, 800);
+                                .postDelayed(() -> {
+                                    isScanning = false;
+                                    Log.d("CameraManager zhihanwang", "扫描解锁，准备下一次扫描");
+                                }, 800);
+                    } else {
+//                        Log.d("CameraManager zhihanwang", "没有识别到二维码");
                     }
                 })
-                .addOnFailureListener(e ->
-                        Log.e("CameraManager zhihanwang", "识别失败：", e)
-                )
-                .addOnCompleteListener(task ->
-                        imageProxy.close()
-                );
+                .addOnFailureListener(e -> {
+                    Log.e("CameraManager zhihanwang", "识别失败：", e);
+                })
+                .addOnCompleteListener(task -> {
+                    imageProxy.close();
+//                    Log.d("CameraManager zhihanwang", "图像处理完成，释放资源");
+                });
     }
+
+
 }
