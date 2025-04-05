@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 
@@ -45,6 +48,10 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
     private boolean isOutbound = true;
     // 是否允许继续识别
     private boolean scannerEnabled = true;
+    // 新增遮罩布局
+    private LinearLayout scanResultOverlay;
+    private TextView scanResultMessage;
+    private ImageView scanResultIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +124,11 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
 
         isOutbound = true;
         scannerEnabled = true;
+
+        // 初始化扫描结果提示框
+        scanResultOverlay = findViewById(R.id.scanResultOverlay);
+        scanResultMessage = findViewById(R.id.scanResultMessage);
+        scanResultIcon = findViewById(R.id.scanResultIcon);
     }
 
     /**
@@ -292,18 +304,81 @@ public class ScannerMainPage extends AppCompatActivity implements ScannerCallbac
                 // 回到UI线程
                 runOnUiThread(() -> {
                     LottieDialog.dismiss(); // 关闭加载动画
-
                     if (success) {
-                        Toast.makeText(this, "✅ 出库成功", Toast.LENGTH_SHORT).show();
+                        showScanResult("✅ 操作成功", R.drawable.success_icon, R.raw.success_sound, success);
                     } else {
-                        Toast.makeText(this, "❌ 出库失败，请检查数据", Toast.LENGTH_SHORT).show();
+                        showScanResult("❌ 操作失败，请检查数据", R.drawable.failure_icon, R.raw.failure_sound, success);
+                        Log.e("ScannerMainPage zhihanwang", "Backend response failed. Please check the request parameters.");
                     }
-                    enableScanner();
                 });
             });
 
         } else {
-            // TODO: 入库逻辑
+            // 入库逻辑
+            disableScanner();
+
+            // 显示loading
+            LottieDialog.showLoading(this, "正在入库中...");
+
+            new ScanProcessor().handleInbound(this, raw, success -> {
+                Log.d("ScannerMainPage zhihanwang", "🚀 已触发 ScanProcessor.handleInbound(), success=" + success);
+
+                // 回到UI线程
+                runOnUiThread(() -> {
+                    LottieDialog.dismiss(); // 关闭加载动画
+
+                    if (success) {
+                        showScanResult("✅ 操作成功", R.drawable.success_icon, R.raw.success_sound, success);
+                    } else {
+                        showScanResult("❌ 操作失败，请检查数据", R.drawable.failure_icon, R.raw.failure_sound, success);
+                        Log.e("ScannerMainPage zhihanwang", "Backend response failed. Please check the request parameters.");
+                    }
+                });
+            });
         }
     }
+
+    private void showScanResult(String message, int iconResId, int soundResId, boolean isSuccess) {
+        // 创建 AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("扫描结果")
+                .setMessage(message)
+                .setIcon(iconResId)
+                .setCancelable(false); // 禁止点击外部取消
+
+        if (isSuccess) {
+            // 如果成功，1秒后自动消失
+            builder.setPositiveButton("确定", null); // 不设置点击事件，自动消失
+        } else {
+            // 如果失败，要求用户点击确定
+            builder.setPositiveButton("确定", (dialog, which) -> {
+                dialog.dismiss();
+                enableScanner(); // 恢复扫描
+            });
+        }
+
+        // 显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // 播放音效
+        try {
+            MediaPlayer mediaPlayer = MediaPlayer.create(this, soundResId);
+            if (mediaPlayer != null) {
+                mediaPlayer.start();
+            }
+        } catch (Exception e) {
+            Log.e("ScannerMainPage", "Error playing sound: " + e.getMessage());
+        }
+
+        // 如果扫描成功，延时1秒后自动关闭对话框
+        if (isSuccess) {
+            new Handler().postDelayed(() -> {
+                dialog.dismiss();
+                enableScanner(); // 恢复扫描
+            }, 1200);  // 1000毫秒 = 1秒
+        }
+    }
+
+
 }

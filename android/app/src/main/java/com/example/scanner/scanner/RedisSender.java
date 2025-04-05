@@ -21,7 +21,7 @@ public class RedisSender {
      */
     public static void sendToRedis(Context context, String raw) {
         try {
-            // 读取 env.properties.properties 中的 Redis 配置
+            // 读取 env.properties 中的 Redis 配置
             InputStream is = context.getAssets().open("env.properties");
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             Map<String, String> envMap = new HashMap<>();
