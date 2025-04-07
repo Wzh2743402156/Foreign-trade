@@ -1,309 +1,207 @@
 <template>
-    <div>
-      <!-- 搜索和操作 -->
-      <div class="bg-white rounded-lg shadow-sm mb-4">
-        <div class="p-4 border-b border-gray-100">
-          <div class="flex flex-wrap gap-3">
-            <div class="relative flex-1 min-w-[200px]">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="搜索标签名称..."
-                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
-            
-            <button 
-              @click="searchTags"
-              class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              搜索
-            </button>
-            
-            <button 
-              @click="showCreateTagModal = true"
-              class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ml-auto"
-            >
-              新建标签
-            </button>
+  <div>
+    <!-- 搜索和操作 -->
+    <div class="bg-white rounded-2xl shadow p-4 mb-6">
+      <div class="flex flex-wrap gap-3 items-center">
+        <div class="relative flex-1 min-w-[200px]">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="搜索标签名称..."
+            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
+        <button @click="showCreateModal = true" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">新增标签</button>
+        <button @click="searchTags" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">搜索</button>
       </div>
-      
-      <!-- 标签列表 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="tag in filteredTags" :key="tag.id" class="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-            <div class="flex items-center">
-              <div 
-                class="w-3 h-3 rounded-full mr-2"
-                :style="{ backgroundColor: tag.color }"
-              ></div>
-              <h3 class="text-sm font-medium text-gray-900">{{ tag.name }}</h3>
-            </div>
-            <div class="flex space-x-1">
-              <button 
-                @click="editTag(tag)"
-                class="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button 
-                @click="deleteTag(tag)"
-                class="p-1 text-gray-500 hover:text-red-700 rounded-full hover:bg-gray-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <div class="bg-gray-50 p-2 rounded">
-                <div class="text-gray-500 mb-1">关联商品</div>
-                <div class="font-medium">{{ tag.productCount }}</div>
-              </div>
-              <div class="bg-gray-50 p-2 rounded">
-                <div class="text-gray-500 mb-1">创建时间</div>
-                <div class="font-medium">{{ tag.createdAt }}</div>
-              </div>
-              <div class="bg-gray-50 p-2 rounded">
-                <div class="text-gray-500 mb-1">库存警戒下限</div>
-                <div class="font-medium">{{ tag.alertLow }}</div>
-              </div>
-              <div class="bg-gray-50 p-2 rounded">
-                <div class="text-gray-500 mb-1">库存警戒上限</div>
-                <div class="font-medium">{{ tag.alertHigh }}</div>
-              </div>
-            </div>
-            <div class="mt-3">
-              <div class="text-xs text-gray-500 mb-1">描述</div>
-              <div class="text-sm text-gray-700">{{ tag.description || '无描述' }}</div>
-            </div>
+    </div>
+
+    <!-- 标签卡片列表 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="tag in filteredTags" :key="tag.id" class="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 class="text-base font-semibold text-gray-800">{{ tag.name }}</h3>
+          <div class="flex gap-2">
+            <button @click="editTag(tag)" class="text-blue-500 hover:underline text-sm">编辑</button>
+            <button @click="deleteTag(tag.id)" class="text-red-500 hover:underline text-sm">删除</button>
           </div>
         </div>
-      </div>
-      
-      <!-- 创建标签模态框 (简化版) -->
-      <div v-if="showCreateTagModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-900">创建新标签</h3>
-            <button @click="showCreateTagModal = false" class="text-gray-500 hover:text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">标签名称</label>
-              <input 
-                v-model="newTag.name" 
-                type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="输入标签名称"
-              />
+        <div class="p-4 space-y-3 text-sm">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-teal-50 text-teal-800 p-3 rounded-lg">
+              <div class="text-xs text-gray-500">关联商品</div>
+              <div class="font-semibold text-base">{{ tag.productCount }}</div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">标签颜色</label>
-              <div class="flex space-x-2">
-                <button 
-                  v-for="color in ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899']" 
-                  :key="color"
-                  @click="newTag.color = color"
-                  class="w-6 h-6 rounded-full border-2"
-                  :class="newTag.color === color ? 'border-gray-900' : 'border-transparent'"
-                  :style="{ backgroundColor: color }"
-                ></button>
-              </div>
+            <div class="bg-indigo-50 text-indigo-800 p-3 rounded-lg">
+              <div class="text-xs text-gray-500">创建时间</div>
+              <div class="font-semibold text-base">{{ formatDate(tag.createdAt) }}</div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
-              <textarea 
-                v-model="newTag.description" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="输入标签描述"
-                rows="3"
-              ></textarea>
+            <div class="bg-amber-50 text-amber-800 p-3 rounded-lg">
+              <div class="text-xs text-gray-500">库存警戒下限</div>
+              <div class="font-semibold text-base">{{ tag.alertLow }}</div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">库存警戒下限</label>
-                <input 
-                  v-model="newTag.alertLow" 
-                  type="number" 
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">库存警戒上限</label>
-                <input 
-                  v-model="newTag.alertHigh" 
-                  type="number" 
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+            <div class="bg-sky-50 text-sky-800 p-3 rounded-lg">
+              <div class="text-xs text-gray-500">库存警戒上限</div>
+              <div class="font-semibold text-base">{{ tag.alertHigh }}</div>
             </div>
-          </div>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button 
-              @click="showCreateTagModal = false"
-              class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              取消
-            </button>
-            <button 
-              @click="createTag"
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              创建
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed, onMounted } from 'vue';
-  
-  // 状态
-  const searchQuery = ref('');
-  const tags = ref([]);
-  const showCreateTagModal = ref(false);
-  const newTag = ref({
-    name: '',
-    color: '#3B82F6',
-    description: '',
-    alertLow: 10,
-    alertHigh: 100
-  });
-  
-  // 模拟数据
-  onMounted(() => {
-    // 模拟API调用获取标签数据
-    tags.value = [
-      { 
-        id: 1, 
-        name: '电子产品', 
-        color: '#3B82F6', 
-        productCount: 25, 
-        createdAt: '2023-01-15', 
-        alertLow: 10, 
-        alertHigh: 100,
-        description: '所有电子类产品，包括手机、电脑等'
-      },
-      { 
-        id: 2, 
-        name: '家具', 
-        color: '#10B981', 
-        productCount: 15, 
-        createdAt: '2023-02-20', 
-        alertLow: 5, 
-        alertHigh: 50,
-        description: '所有家具类产品，包括桌椅、沙发等'
-      },
-      { 
-        id: 3, 
-        name: '服装', 
-        color: '#F59E0B', 
-        productCount: 40, 
-        createdAt: '2023-03-10', 
-        alertLow: 15, 
-        alertHigh: 150,
-        description: '所有服装类产品，包括上衣、裤子等'
-      },
-      { 
-        id: 4, 
-        name: '食品', 
-        color: '#EF4444', 
-        productCount: 30, 
-        createdAt: '2023-04-05', 
-        alertLow: 20, 
-        alertHigh: 200,
-        description: '所有食品类产品，包括零食、饮料等'
-      },
-      { 
-        id: 5, 
-        name: '玩具', 
-        color: '#8B5CF6', 
-        productCount: 20, 
-        createdAt: '2023-05-01', 
-        alertLow: 10, 
-        alertHigh: 80,
-        description: '所有玩具类产品，包括积木、玩偶等'
-      }
-    ];
-  });
-  
-  // 计算属性
-  const filteredTags = computed(() => {
-    if (!searchQuery.value) {
-      return tags.value;
+
+    <!-- 编辑模态框 -->
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-lg font-semibold mb-4">编辑标签</h2>
+        <input v-model="editForm.name" type="text" class="w-full border rounded p-2 mb-4" placeholder="请输入新的标签名" />
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <input v-model.number="editForm.alertLow" type="number" class="border rounded p-2" placeholder="库存警戒下限" />
+          <input v-model.number="editForm.alertHigh" type="number" class="border rounded p-2" placeholder="库存警戒上限" />
+        </div>
+        <div class="flex justify-end gap-3">
+          <button @click="showEditModal = false" class="px-4 py-2 bg-gray-200 rounded">取消</button>
+          <button @click="confirmEdit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增模态框 -->
+    <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-lg font-semibold mb-4">新增标签</h2>
+        <input v-model="createForm.name" type="text" class="w-full border rounded p-2 mb-4" placeholder="请输入标签名" />
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <input v-model.number="createForm.alertLow" type="number" class="border rounded p-2" placeholder="库存警戒下限" />
+          <input v-model.number="createForm.alertHigh" type="number" class="border rounded p-2" placeholder="库存警戒上限" />
+        </div>
+        <div class="flex justify-end gap-3">
+          <button @click="showCreateModal = false" class="px-4 py-2 bg-gray-200 rounded">取消</button>
+          <button @click="confirmCreate" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">创建</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+
+const searchQuery = ref('')
+const tags = ref([])
+const showEditModal = ref(false)
+const showCreateModal = ref(false)
+const editForm = ref({ id: null, name: '', alertLow: 0, alertHigh: 100 })
+const createForm = ref({ name: '', alertLow: 0, alertHigh: 100 })
+const shopId = 1
+const factoryId = 0
+
+onMounted(fetchTags)
+
+async function fetchTags() {
+  try {
+    const res = await axios.get(`http://8.130.70.249:8080/api/tags/with_alert?shop_id=${shopId}`)
+    if (res.data.success) {
+      tags.value = res.data.data
     }
-    
-    const query = searchQuery.value.toLowerCase();
-    return tags.value.filter(tag => 
-      tag.name.toLowerCase().includes(query) || 
-      (tag.description && tag.description.toLowerCase().includes(query))
-    );
-  });
-  
-  // 方法
-  function searchTags() {
-    // 实际应用中可能需要调用API
-    console.log('搜索标签:', searchQuery.value);
+  } catch (error) {
+    console.error('获取标签失败:', error)
   }
-  
-  function editTag(tag) {
-    // 实际应用中应打开编辑模态框
-    console.log('编辑标签:', tag);
-  }
-  
-  function deleteTag(tag) {
-    // 实际应用中应显示确认对话框
-    console.log('删除标签:', tag);
-    
-    if (confirm(`确定要删除标签 "${tag.name}" 吗？`)) {
-      // 模拟删除操作
-      tags.value = tags.value.filter(t => t.id !== tag.id);
+}
+
+const filteredTags = computed(() => {
+  if (!searchQuery.value) return tags.value
+  const q = searchQuery.value.toLowerCase()
+  return tags.value.filter(tag => tag.name.toLowerCase().includes(q))
+})
+
+function searchTags() {
+  fetchTags()
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+async function editTag(tag) {
+  try {
+    const alertRes = await axios.post('http://8.130.70.249:8080/api/alert/get', { tag_id: tag.id })
+    editForm.value = {
+      id: tag.id,
+      name: tag.name,
+      alertLow: alertRes.data.alert_low || 0,
+      alertHigh: alertRes.data.alert_high || 100
     }
+    showEditModal.value = true
+  } catch (error) {
+    console.error('获取告警信息失败:', error)
   }
-  
-  function createTag() {
-    // 模拟创建标签
-    const newTagObj = {
-      id: tags.value.length + 1,
-      name: newTag.value.name,
-      color: newTag.value.color,
-      description: newTag.value.description,
-      alertLow: parseInt(newTag.value.alertLow),
-      alertHigh: parseInt(newTag.value.alertHigh),
-      productCount: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    
-    tags.value.push(newTagObj);
-    
-    // 重置表单
-    newTag.value = {
-      name: '',
-      color: '#3B82F6',
-      description: '',
-      alertLow: 10,
-      alertHigh: 100
-    };
-    
-    // 关闭模态框
-    showCreateTagModal.value = false;
+}
+
+async function confirmEdit() {
+  try {
+    await axios.post('http://8.130.70.249:8080/api/tags/update', {
+      id: editForm.value.id,
+      name: editForm.value.name
+    })
+    await axios.post('http://8.130.70.249:8080/api/alert/set', {
+      tag_id: editForm.value.id,
+      alert_low: editForm.value.alertLow,
+      alert_high: editForm.value.alertHigh
+    })
+    showEditModal.value = false
+    fetchTags()
+  } catch (error) {
+    console.error('编辑标签失败:', error)
   }
-  </script>
+}
+
+async function deleteTag(id) {
+  if (!confirm('确定删除该标签吗？')) return
+  try {
+    await axios.delete(`http://8.130.70.249:8080/api/tags/delete/${id}`)
+    fetchTags()
+  } catch (error) {
+    console.error('删除标签失败:', error)
+  }
+}
+
+async function confirmCreate() {
+  if (!createForm.value.name) return
+  try {
+    await axios.post('http://8.130.70.249:8080/api/tags/create', {
+      name: createForm.value.name,
+      shop_id: shopId,
+      factory_id: factoryId
+    })
+    const idRes = await axios.get(`http://8.130.70.249:8080/api/tags/id?name=${createForm.value.name}&shop_id=${shopId}`)
+    const tagId = idRes.data.tag_id
+    await axios.post('http://8.130.70.249:8080/api/alert/set', {
+      tag_id: tagId,
+      alert_low: createForm.value.alertLow,
+      alert_high: createForm.value.alertHigh
+    })
+    showCreateModal.value = false
+    createForm.value = { name: '', alertLow: 0, alertHigh: 100 }
+    fetchTags()
+  } catch (error) {
+    console.error('创建标签失败:', error)
+  }
+}
+</script>
+
+<style scoped>
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>
