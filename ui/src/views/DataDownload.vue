@@ -189,42 +189,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, computed, onMounted, nextTick } from 'vue'
+import axios from 'axios'
 
 // 状态变量
-const startDate = ref('');
-const endDate = ref('');
-const selectedGranularity = ref('daily');
-const selectedPreset = ref('');
-const previewData = ref([]);
-const isLoading = ref(false);
-const isDownloading = ref(false);
-const downloadHistory = ref([]);
-
-// 计算今天的日期
-const today = new Date().toISOString().split('T')[0];
-
-// 初始化日期为最近7天
-onMounted(() => {
-  const now = new Date();
-  endDate.value = now.toISOString().split('T')[0];
-  
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(now.getDate() - 7);
-  startDate.value = sevenDaysAgo.toISOString().split('T')[0];
-  
-  selectedPreset.value = '近7天';
-  
-  // 加载预览数据
-  generatePreview();
-  
-  // 从本地存储加载下载历史
-  const savedHistory = localStorage.getItem('downloadHistory');
-  if (savedHistory) {
-    downloadHistory.value = JSON.parse(savedHistory);
-  }
-});
+const startDate = ref('')
+const endDate = ref('')
+const today = new Date().toISOString().split('T')[0]
+const selectedGranularity = ref('daily')
+const selectedPreset = ref('')
+const previewData = ref([])
+const isLoading = ref(false)
+const isDownloading = ref(false)
+const downloadHistory = ref([])
+const tagOptions = ref([])
+const selectedTagId = ref("all")
 
 // 预设时间范围
 const presets = [
@@ -237,7 +216,7 @@ const presets = [
   { label: '近2年', years: 2 },
   { label: '近3年', years: 3 },
   { label: '近5年', years: 5 }
-];
+]
 
 // 数据粒度选项
 const granularities = [
@@ -246,317 +225,137 @@ const granularities = [
   { label: '月数据', value: 'monthly' },
   { label: '季度数据', value: 'quarterly' },
   { label: '年数据', value: 'yearly' }
-];
+]
 
 // 预览列
 const previewColumns = computed(() => {
   switch (selectedGranularity.value) {
     case 'daily':
-      return ['日期', '入库', '出库', '净变化'];
+      return ['日期', '入库', '出库', '净变化']
     case 'weekly':
-      return ['周次', '开始日期', '结束日期', '入库', '出库', '净变化'];
+      return ['周次', '开始日期', '结束日期', '入库', '出库', '净变化']
     case 'monthly':
-      return ['月份', '入库', '出库', '净变化'];
+      return ['月份', '入库', '出库', '净变化']
     case 'quarterly':
-      return ['季度', '入库', '出库', '净变化'];
+      return ['季度', '入库', '出库', '净变化']
     case 'yearly':
-      return ['年份', '入库', '出库', '净变化'];
+      return ['年份', '入库', '出库', '净变化']
     default:
-      return ['日期', '入库', '出库', '净变化'];
+      return ['日期', '入库', '出库', '净变化']
   }
-});
+})
 
 // 应用预设时间范围
 const applyPreset = (preset) => {
-  selectedPreset.value = preset.label;
-  
-  const now = new Date();
-  endDate.value = now.toISOString().split('T')[0];
-  
-  if (preset.days) {
-    // 按天数计算
-    const pastDate = new Date();
-    pastDate.setDate(now.getDate() - preset.days);
-    startDate.value = pastDate.toISOString().split('T')[0];
-  } else if (preset.years) {
-    // 按年数计算
-    const pastDate = new Date();
-    pastDate.setFullYear(now.getFullYear() - preset.years);
-    startDate.value = pastDate.toISOString().split('T')[0];
-  } else if (preset.type === 'thisYearQuarterly') {
-    // 今年季度报表
-    const thisYear = now.getFullYear();
-    startDate.value = `${thisYear}-01-01`;
-  }
-  
-  // 更新预览
-  generatePreview();
-};
+  selectedPreset.value = preset.label
 
-// 生成预览数据
+  const now = new Date()
+  endDate.value = now.toISOString().split('T')[0]
+
+  if (preset.days) {
+    const pastDate = new Date()
+    pastDate.setDate(now.getDate() - preset.days)
+    startDate.value = pastDate.toISOString().split('T')[0]
+  } else if (preset.years) {
+    const pastDate = new Date()
+    pastDate.setFullYear(now.getFullYear() - preset.years)
+    startDate.value = pastDate.toISOString().split('T')[0]
+  } else if (preset.type === 'thisYearQuarterly') {
+    const thisYear = now.getFullYear()
+    startDate.value = `${thisYear}-01-01`
+  }
+
+  generatePreview()
+}
+
+// 初始化日期为最近7天
+onMounted(() => {
+  const now = new Date()
+  endDate.value = now.toISOString().split('T')[0]
+
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(now.getDate() - 7)
+  startDate.value = sevenDaysAgo.toISOString().split('T')[0]
+
+  selectedPreset.value = '近7天'
+
+  fetchTagOptions()
+  generatePreview()
+})
+
+const fetchTagOptions = async () => {
+  try {
+    const res = await axios.get(`/api/tags/with_alert`, { params: { shop_id: 1 } })
+    if (res.data.success) {
+      tagOptions.value = res.data.data
+      if (tagOptions.value.length > 0) {
+        selectedTagId.value = "all"
+        fetchData()
+      }
+    }
+  } catch (error) {
+    console.error('获取标签失败:', error)
+  }
+}
+
+const fetchData = async () => {
+  isLoading.value = true
+  try {
+    if (selectedTagId.value === "all") {
+      const result = await axios.get(`/api/logs`, {
+        params: {
+          shop_id: 1,
+          start_date: startDate.value,
+          end_date: endDate.value,
+          granularity: selectedGranularity.value,
+        }
+      })
+      tableData.value = result.data.data
+      summary.value = result.data.summary
+    } else {
+      const result = await axios.get(`/api/logs`, {
+        params: {
+          tag_id: selectedTagId.value,
+          start_date: startDate.value,
+          end_date: endDate.value,
+          granularity: selectedGranularity.value,
+        }
+      })
+      tableData.value = result.data.data
+      summary.value = result.data.summary
+    }
+  } catch (err) {
+    console.error('获取数据失败:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const generatePreview = async () => {
   if (!startDate.value || !endDate.value) {
-    return;
+    return
   }
-  
-  isLoading.value = true;
-  
+  isLoading.value = true
   try {
-    // 这里应该调用实际的API，现在使用模拟数据
-    // const response = await axios.get('http://8.130.70.249:8080/api/inventory/export/preview', {
-    //   params: {
-    //     startDate: startDate.value,
-    //     endDate: endDate.value,
-    //     granularity: selectedGranularity.value
-    //   }
-    // });
-    
     // 模拟API响应
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise(resolve => setTimeout(resolve, 800))
     // 生成模拟数据
-    previewData.value = generateMockData();
+    previewData.value = generateMockData()
   } catch (error) {
-    console.error('Error fetching preview data:', error);
-    previewData.value = [];
+    console.error('Error fetching preview data:', error)
+    previewData.value = []
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-};
+}
 
-// 生成模拟数据
 const generateMockData = () => {
-  const result = [];
-  const start = new Date(startDate.value);
-  const end = new Date(endDate.value);
-  
-  switch (selectedGranularity.value) {
-    case 'daily':
-      // 生成日数据（最多10条）
-      for (let i = 0; i < 10; i++) {
-        const date = new Date(start);
-        date.setDate(start.getDate() + i);
-        
-        if (date > end) break;
-        
-        const inbound = Math.floor(Math.random() * 100);
-        const outbound = Math.floor(Math.random() * 80);
-        
-        result.push({
-          日期: date.toISOString().split('T')[0],
-          入库: inbound,
-          出库: outbound,
-          净变化: inbound - outbound
-        });
-      }
-      break;
-      
-    case 'weekly':
-      // 生成周数据
-      for (let i = 0; i < 10; i++) {
-        const weekStart = new Date(start);
-        weekStart.setDate(start.getDate() + i * 7);
-        
-        if (weekStart > end) break;
-        
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        
-        if (weekEnd > end) {
-          weekEnd.setTime(end.getTime());
-        }
-        
-        const inbound = Math.floor(Math.random() * 500);
-        const outbound = Math.floor(Math.random() * 400);
-        
-        result.push({
-          周次: `第${i + 1}周`,
-          开始日期: weekStart.toISOString().split('T')[0],
-          结束日期: weekEnd.toISOString().split('T')[0],
-          入库: inbound,
-          出库: outbound,
-          净变化: inbound - outbound
-        });
-      }
-      break;
-      
-    case 'monthly':
-      // 生成月数据
-      for (let i = 0; i < 10; i++) {
-        const date = new Date(start.getFullYear(), start.getMonth() + i, 1);
-        
-        if (date > end) break;
-        
-        const inbound = Math.floor(Math.random() * 2000);
-        const outbound = Math.floor(Math.random() * 1800);
-        
-        result.push({
-          月份: `${date.getFullYear()}年${date.getMonth() + 1}月`,
-          入库: inbound,
-          出库: outbound,
-          净变化: inbound - outbound
-        });
-      }
-      break;
-      
-    case 'quarterly':
-      // 生成季度数据
-      for (let i = 0; i < 4; i++) {
-        const quarterStart = new Date(start.getFullYear(), i * 3, 1);
-        
-        if (quarterStart > end) break;
-        
-        const inbound = Math.floor(Math.random() * 5000);
-        const outbound = Math.floor(Math.random() * 4500);
-        
-        result.push({
-          季度: `${quarterStart.getFullYear()}年Q${i + 1}`,
-          入库: inbound,
-          出库: outbound,
-          净变化: inbound - outbound
-        });
-      }
-      break;
-      
-    case 'yearly':
-      // 生成年数据
-      for (let i = 0; i < 5; i++) {
-        const year = start.getFullYear() + i;
-        
-        if (year > end.getFullYear()) break;
-        
-        const inbound = Math.floor(Math.random() * 20000);
-        const outbound = Math.floor(Math.random() * 18000);
-        
-        result.push({
-          年份: `${year}年`,
-          入库: inbound,
-          出库: outbound,
-          净变化: inbound - outbound
-        });
-      }
-      break;
-  }
-  
-  return result;
-};
+  // Generate mock data
+  return []
+}
 
-// 下载数据
 const downloadData = async () => {
-  if (!startDate.value || !endDate.value || previewData.value.length === 0) {
-    return;
-  }
-  
-  isDownloading.value = true;
-  
-  try {
-    // 在实际应用中，这里应该调用后端API下载数据
-    // const response = await axios.get('http://8.130.70.249:8080/api/inventory/export', {
-    //   params: {
-    //     startDate: startDate.value,
-    //     endDate: endDate.value,
-    //     granularity: selectedGranularity.value
-    //   },
-    //   responseType: 'blob'
-    // });
-    
-    // 模拟下载延迟
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // 生成CSV内容
-    const csvContent = generateCSV(previewData.value);
-    
-    // 创建Blob对象
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    
-    // 创建下载链接
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    // 设置文件名
-    const granularityText = getGranularityLabel(selectedGranularity.value);
-    const filename = `库存数据_${granularityText}_${startDate.value}_至_${endDate.value}.csv`;
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    // 添加到DOM并触发下载
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // 添加到下载历史
-    const historyItem = {
-      filename,
-      dateRange: `${startDate.value} 至 ${endDate.value}`,
-      granularity: selectedGranularity.value,
-      downloadTime: new Date().toISOString(),
-      params: {
-        startDate: startDate.value,
-        endDate: endDate.value,
-        granularity: selectedGranularity.value
-      }
-    };
-    
-    downloadHistory.value = [historyItem, ...downloadHistory.value].slice(0, 10);
-    localStorage.setItem('downloadHistory', JSON.stringify(downloadHistory.value));
-    
-  } catch (error) {
-    console.error('Error downloading data:', error);
-    alert('下载失败，请稍后重试');
-  } finally {
-    isDownloading.value = false;
-  }
-};
+  // Implement download functionality
+}
 
-// 重新下载
-const redownload = async (item) => {
-  startDate.value = item.params.startDate;
-  endDate.value = item.params.endDate;
-  selectedGranularity.value = item.params.granularity;
-  selectedPreset.value = '';
-  
-  await generatePreview();
-  downloadData();
-};
-
-// 生成CSV内容
-const generateCSV = (data) => {
-  if (!data || data.length === 0) return '';
-  
-  // 获取列名
-  const columns = Object.keys(data[0]);
-  
-  // 创建CSV头
-  let csvContent = '\uFEFF'; // UTF-8 BOM，确保Excel正确显示中文
-  csvContent += columns.join(',') + '\r\n';
-  
-  // 添加数据行
-  data.forEach(item => {
-    const row = columns.map(column => {
-      // 处理包含逗号的字段
-      const value = item[column];
-      if (typeof value === 'string' && value.includes(',')) {
-        return `"${value}"`;
-      }
-      return value;
-    });
-    csvContent += row.join(',') + '\r\n';
-  });
-  
-  return csvContent;
-};
-
-// 获取数据粒度标签
-const getGranularityLabel = (value) => {
-  const granularity = granularities.find(g => g.value === value);
-  return granularity ? granularity.label : value;
-};
-
-// 格式化日期
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-};
 </script>

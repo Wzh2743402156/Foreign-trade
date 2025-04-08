@@ -77,12 +77,15 @@ const props = defineProps({
   chartType: {
     type: String,
     default: 'line'
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 });
 
 const chartCanvas = ref(null);
 const chart = ref(null);
-const loading = ref(true);
 const zoomLevel = ref(1);
 const maxZoomLevel = computed(() => {
   if (!props.chartData || !props.chartData.labels) return 1;
@@ -120,7 +123,6 @@ const updateChartView = () => {
 // 创建图表
 const createChart = () => {
   if (!chartCanvas.value || !props.chartData || !props.chartData.labels || props.chartData.labels.length === 0) {
-    loading.value = false;
     return;
   }
   
@@ -252,14 +254,11 @@ const createChart = () => {
   } catch (error) {
     console.error('Error creating chart:', error);
   }
-  
-  loading.value = false;
 };
 
 // 监听数据变化
 watch(() => props.chartData, async (newVal) => {
   if (newVal && newVal.labels && newVal.labels.length > 0) {
-    loading.value = true;
     await nextTick();
     createChart();
   }
@@ -268,7 +267,6 @@ watch(() => props.chartData, async (newVal) => {
 // 监听图表类型变化
 watch(() => props.chartType, async (newVal) => {
   if (props.chartData && props.chartData.labels && props.chartData.labels.length > 0) {
-    loading.value = true;
     await nextTick();
     createChart();
   }
