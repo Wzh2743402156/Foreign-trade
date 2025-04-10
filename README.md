@@ -40,8 +40,8 @@ CloudStock 是面向中小型外贸流通企业的仓储管理系统，围绕“
 
 ## 📄 文档入口
 
-- 📘 <a href="./Docs/CloudStock_PRD_v1.2.pdf" download>点击下载 PRD 文档（PDF）</a>
-- 📐 [📎 原型图预览（Axure 源文件）](./Docs/Prototype_Preview.png)
+- 📘 [点击下载 PRD 文档（PDF）](https://github.com/Wzh2743402156/Foreign-trade-UI/raw/main/Docs/CloudStock_PRD_v1.2.pdf?download=1)
+- 📐 [📎 原型图预览（Axure 源文件）](./Docs/Axure)
 - 💾 [📎 数据库结构设计文档](./SQL/README.md)
 - 🔧 [📎 后端接口文档（Swagger/OpenAPI）](./Docs/API_Document.md)
 
