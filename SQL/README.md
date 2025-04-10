@@ -25,8 +25,6 @@
 | specification  | VARCHAR(255)   | 商品规格     |
 | remark         | TEXT           | 备注         |
 
----
-
 ### 2. `Packages` 包裹信息表
 
 | 字段名     | 类型         | 描述         |
@@ -36,8 +34,6 @@
 | tag        | JSON         | 标签绑定     |
 | status     | INT          | 当前状态     |
 | log_id     | INT          | 对应日志ID   |
-
----
 
 ### 3. `Users` 用户表
 
@@ -53,8 +49,6 @@
 | create_date  | DATETIME       | 创建时间     |
 | update_date  | DATETIME       | 更新时间     |
 
----
-
 ### 4. `Shops` 门店表
 
 | 字段名       | 类型           | 描述         |
@@ -66,8 +60,6 @@
 | update_date  | DATETIME       | 更新时间     |
 | remark       | TEXT           | 备注         |
 
----
-
 ### 5. `Factories` 工厂表
 
 | 字段名       | 类型           | 描述         |
@@ -78,8 +70,6 @@
 | create_date  | DATETIME       | 创建时间     |
 | update_date  | DATETIME       | 更新时间     |
 | remark       | TEXT           | 备注         |
-
----
 
 ### 6. `Tags` 标签表
 
@@ -94,8 +84,6 @@
 | stock      | INT          | 当前库存         |
 | date       | DATE         | 数据对应日期     |
 
----
-
 ### 7. `TagLogs` 标签日记录表
 
 | 字段名     | 类型       | 描述           |
@@ -109,8 +97,6 @@
 
 > 唯一约束：`(tag_id, date)` 保证每日一条记录
 
----
-
 ### 8. `Alert` 库存预警表
 
 | 字段名     | 类型       | 描述         |
@@ -119,8 +105,6 @@
 | tag_id     | INT        | 所属标签     |
 | alert_low  | INT        | 下限预警阈值 |
 | alert_high | INT        | 上限预警阈值 |
-
----
 
 ### 9. `Logs` 操作日志表
 
