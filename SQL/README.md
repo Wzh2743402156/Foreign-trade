@@ -1,13 +1,10 @@
 # CloudStock 数据库结构说明文档
 
 > **文件说明：**  
->  
 > 1. `databases_init.sql`  
 > &emsp;用于数据库建表  
->  
 > 2. `create_and_insert.sql`  
 > &emsp;用于插入 sample 数据  
->  
 > 3. `generate_sample.py`  
 > &emsp;用于生成 sample 数据的 SQL 文件  
 
