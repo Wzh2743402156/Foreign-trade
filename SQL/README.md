@@ -5,7 +5,7 @@
 >
 > 2. `create_and_insert.sql` : 用于插入 sample 数据
 >
-> 3. `generate_sample.py`: 用于生成 sample 数据的 SQL 文件  
+> 3. `generate_sample.py`: 用于生成 sample 数据的 SQL 文件
 
 ## 一、数据库表结构概览（MySQL）
 
