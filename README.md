@@ -4,6 +4,20 @@
 
 ---
 
+## 🧱 系统架构总览
+
+| 层级 | 组件 / 模块 | 说明 |
+|------|--------------|------|
+| 🎨 前端展示层 | `Vue3 + Vite` | 基于模块化 UI 构建，兼容桌面浏览器与 Android WebView 嵌入式扫码操作 |
+| 🤖 智能 UI 接入 | `扫码终端 / ESP32 模块` | 实现商品二维码自动采集，自动触发前端入库请求 |
+| 🌐 API 网关层 | `JWT 鉴权 + 权限校验` | 用户身份认证、接口分级管理、防止接口滥用与未授权调用 |
+| 🧠 应用服务层 | `Golang + Gin` | 独立部署的微服务组件，解耦业务逻辑，如：商品、标签、日志、用户等模块 |
+| 🔁 消息队列层 | `Redis List 缓存` | 移动扫码数据 JSON 入队，后端通过协程异步消费写入数据库，缓解并发冲击 |
+| 🧩 数据存储层 | `MySQL` | 存储核心业务数据，表结构标准化，支持软删除、时间戳、预警机制 |
+| 🧮 数据可视化层 | `前端图表 / 仪表盘组件` | 展示出入库统计、库存状态与标签预警情况 |
+
+---
+
 ## 🧾 项目简介
 
 CloudStock 是面向中小型外贸流通企业的仓储管理系统，围绕“扫码即操作、数据即同步”理念，整合商品管理、扫码入库、库存预警、出入库日志追踪等功能，全面提升企业在实际场景下的库存效率与数据透明度。
@@ -26,14 +40,14 @@ CloudStock 是面向中小型外贸流通企业的仓储管理系统，围绕“
 
 ## 📄 文档入口
 
-- 📘 [📎 PRD 文档下载（PDF）](./docs/CloudStock_PRD.pdf)
-- 📐 [📎 原型图预览（Figma 链接或截图）](./docs/Prototype_Preview.png)
+- 📘 <a href="./docs/CloudStock_PRD.pdf" download>点击下载 PRD 文档（PDF）</a>
+- 📐 [📎 原型图预览（Axure 源文件）](./docs/Prototype_Preview.png)
 - 💾 [📎 数据库结构设计文档](./SQL/README.md)
 - 🔧 [📎 后端接口文档（Swagger/OpenAPI）](./docs/API_Document.md)
 
 ---
 
-## 🖼️ 系统界面展示（选图示意）
+## 🖼️ 系统界面展示
 
 | 页面 | 预览 |
 |------|------|
@@ -55,10 +69,12 @@ CloudStock 是面向中小型外贸流通企业的仓储管理系统，围绕“
 
 ## 🧭 项目结构一览
 
-CloudStock/ ├── frontend/ # Vue3 项目 ├── backend/ # Gin 后端服务 ├── SQL/ # 数据库结构文档 ├── docs/ # 原型图、PRD、API 文档 ├── screenshots/ # 系统截图展示 ├── README.md # 项目总览说明
-
-yaml
-Copy
-Edit
-
----
+```plaintext
+CloudStock/
+├── frontend/           # Vue3 前端项目
+├── backend/            # Gin 后端服务
+├── SQL/                # 数据库结构文档
+├── docs/               # 原型图、PRD、API 文档
+├── screenshots/        # 系统界面展示图
+└── README.md           # 项目总览文档（本文件）
+```
