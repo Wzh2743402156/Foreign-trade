@@ -1,122 +1,64 @@
-# 📦 CloudStock 仓储管理系统
+# 🚀 CloudStock 仓储管理系统
 
-基于 **Gin + GORM + Vue3** 构建的现代化出入库管理系统，支持条码识别、权限分级、库存预警、可视化分析。
-
----
-
-## 项目目录
-
-- [项目介绍](#项目介绍)
-- [功能模块](#功能模块)
-- [数据库表结构](#数据库表结构)
-- [接口示例](#接口示例)
-- [运行方式](#运行方式)
+> 一个轻量化、高并发支持的外贸企业商品出入库解决方案
 
 ---
 
-## 项目介绍
+## 🧾 项目简介
 
-CloudStock 致力于提供一套高效、轻量级的出入库与库存管理方案，适用于小型工厂、门店连锁、电商仓库等场景。
+CloudStock 是面向中小型外贸流通企业的仓储管理系统，围绕“扫码即操作、数据即同步”理念，整合商品管理、扫码入库、库存预警、出入库日志追踪等功能，全面提升企业在实际场景下的库存效率与数据透明度。
 
----
-
-## 功能模块
-
-- ✅ 用户登录 / 权限管理（支持多角色）
-- ✅ 出库入库明细登记
-- ✅ 条码管理（支持标准条形码与二维码）
-- ✅ 实时库存统计 & 预警
-- ✅ 可视化报表：折线图 / 柱状图
-- ✅ 店铺权限隔离 & 管理员后台
+系统采用分层架构，后端基于 Golang + Gin 框架，前端采用 Vue3 搭配 Vite，支持 Redis 异步缓存与移动端扫码操作，适用于实际场景中高并发、强追踪的出入库管理任务。
 
 ---
 
-## 数据库表结构
+## 🧩 功能模块
 
-### 1. `users` 用户表
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | int | 主键 |
-| username | varchar | 登录名 |
-| password | varchar | 密码（加密） |
-| role_id | int | 权限角色（1=admin，2=shop等） |
-| shop_id | int | 所属门店（可选） |
-
-### 2. `products` 商品表
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | int | 主键 |
-| name | varchar | 商品名称 |
-| barcode | varchar | 条码（唯一） |
-| description | text | 说明 |
-| unit | varchar | 单位（如箱、瓶） |
-
-### 3. `inbound_records` 入库明细
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | int | 主键 |
-| product_id | int | 商品ID |
-| quantity | int | 入库数量 |
-| created_at | datetime | 入库时间 |
-| operator_id | int | 操作人ID |
-
-### 4. `outbound_records` 出库明细
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | int | 主键 |
-| product_id | int | 商品ID |
-| quantity | int | 出库数量 |
-| created_at | datetime | 出库时间 |
-| operator_id | int | 操作人ID |
-
-### 5. `inventory` 实时库存表
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | int | 主键 |
-| product_id | int | 商品ID |
-| current_quantity | int | 当前库存 |
+| 模块 | 功能简介 |
+|------|----------|
+| 📦 商品管理 | 商品录入、库存查询、标签分类、SKU 唯一绑定 |
+| 🚚 出入库操作 | 支持扫码快速出/入库，移动端扫码即触发操作 |
+| 🔍 日志系统 | 所有操作全流程自动记录，确保可审计可追溯 |
+| 🚨 库存预警 | 实时监控库存状态，库存低于阈值自动触发预警 |
+| 📊 数据统计 | 支持按时间、标签、商品维度进行出入库统计 |
 
 ---
 
-## 接口示例
+## 📄 文档入口
 
-```bash
-POST /api/login
-{
-  "username": "admin",
-  "password": "123456"
-}
-```
-
-返回：
-
-```json
-{
-  "success": true,
-  "message": "登录成功",
-  "data": {
-    "user_id": 1,
-    "token": "xxxx"
-  }
-}
-```
+- 📘 [📎 PRD 文档下载（PDF）](./docs/CloudStock_PRD.pdf)
+- 📐 [📎 原型图预览（Figma 链接或截图）](./docs/Prototype_Preview.png)
+- 💾 [📎 数据库结构设计文档](./SQL/README.md)
+- 🔧 [📎 后端接口文档（Swagger/OpenAPI）](./docs/API_Document.md)
 
 ---
 
-## 运行方式
+## 🖼️ 系统界面展示（选图示意）
 
-### 后端启动
+| 页面 | 预览 |
+|------|------|
+| 📱 移动端扫码页面 | ![](./screenshots/mobile_scan_demo.png) |
+| 🗃️ 商品管理界面 | ![](./screenshots/product_manage.png) |
+| 📊 库存统计仪表盘 | ![](./screenshots/statistics_dashboard.png) |
 
-```bash
-cd backend
-go mod tidy
-go run main.go
-```
+---
 
-### 前端启动
+## 🏗️ 技术栈概览
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- **前端**：Vue3 + Vite + Axios + TailwindCSS
+- **后端**：Go + Gin + GORM + Redis + MySQL
+- **接口**：RESTful API + JWT 鉴权
+- **部署**：Docker 容器化 + 自动化 CI/CD
+- **移动端扫码支持**：兼容 Android WebView，支持 ESP32 外部扫码输入
+
+---
+
+## 🧭 项目结构一览
+
+CloudStock/ ├── frontend/ # Vue3 项目 ├── backend/ # Gin 后端服务 ├── SQL/ # 数据库结构文档 ├── docs/ # 原型图、PRD、API 文档 ├── screenshots/ # 系统截图展示 ├── README.md # 项目总览说明
+
+yaml
+Copy
+Edit
+
+---
